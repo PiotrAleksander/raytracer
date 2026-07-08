@@ -1,27 +1,12 @@
 use raytracing::vec3::unit_vector;
-use raytracing::Ray;
-use raytracing::{write_color, Color};
+use raytracing::{write_color, Color, HittableList, Sphere};
+use raytracing::{HitRecord, Ray};
 use raytracing::{Point3, Vec3};
 
-fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
-    let oc = center - r.origin;
-    let a = r.direction.length_squared();
-    let h = r.direction.dot(oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
-    if discriminant < 0.0 {
-        return -1.0;
-    } else {
-        return (h - discriminant.sqrt()) / a;
-    }
-}
-
-fn ray_color(r: Ray) -> Color {
-    let t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        #[allow(non_snake_case)]
-        let N = unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        return 0.5 * Color::new(N.x + 1.0, N.y + 1.0, N.z + 1.0);
+fn ray_color(r: &Ray, world: &HittableList) -> Color {
+    let mut rec = HitRecord::default();
+    if world.hit(r, 0.0, f64::INFINITY, &mut rec) {
+        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
     }
 
     let unit_direction = unit_vector(r.direction);
@@ -41,8 +26,18 @@ fn main() {
         image_height
     };
 
-    // Camera
+    // World
+    let mut world = HittableList::default();
+    world.add(Box::new(Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+    }));
+    world.add(Box::new(Sphere {
+        center: Point3::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+    }));
 
+    // Camera
     let focal_length = 1.0;
     let viewport_height = 2.0;
     let viewport_width = viewport_height * (image_width / image_height);
@@ -70,7 +65,7 @@ fn main() {
                 pixel00_loc + ((i as f64) * pixel_delta_u) + ((j as f64) * pixel_delta_v);
             let ray_direction = pixel_center - camera_center;
             let r = Ray::new(camera_center, ray_direction);
-            let pixel_color = ray_color(r);
+            let pixel_color = ray_color(&r, &world);
             write_color(pixel_color);
         }
     }
