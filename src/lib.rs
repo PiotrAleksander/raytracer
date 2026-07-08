@@ -4,4 +4,4 @@ pub mod vec3;
 
 pub use color::{write_color, Color};
 pub use ray::Ray;
-pub use vec3::{Point, Vec3};
+pub use vec3::{Point3, Vec3};

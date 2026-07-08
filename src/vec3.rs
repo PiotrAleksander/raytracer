@@ -107,7 +107,7 @@ impl DivAssign<f64> for Vec3 {
     }
 }
 
-pub type Point = Vec3;
+pub type Point3 = Vec3;
 
 impl std::fmt::Display for Vec3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

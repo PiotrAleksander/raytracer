@@ -1,0 +1,9 @@
+[
+  {
+    "label": "make open",
+    "command": "make open",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  }
+]

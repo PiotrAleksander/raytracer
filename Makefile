@@ -13,7 +13,12 @@ run: release
 	./target/release/$(BIN) > $(OUT)
 
 open: run
-	open $(OUT)
+	@open -n -a Preview "$(OUT)"; \
+	sleep 1; \
+	pid=$$(pgrep -nx Preview); \
+	trap "kill $$pid 2>/dev/null" EXIT INT TERM HUP; \
+	echo "Preview open (pid $$pid) — stop this task to close it."; \
+	while kill -0 $$pid 2>/dev/null; do sleep 1; done
 
 test:
 	cargo test
