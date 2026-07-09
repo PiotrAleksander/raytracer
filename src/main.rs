@@ -1,21 +1,9 @@
 use raytracing::vec3::unit_vector;
-use raytracing::{write_color, Color, Hittable, HittableList, Sphere};
+use raytracing::{write_color, Color, HitRecord, Hittable, HittableList, Interval, Sphere};
 use raytracing::{Point3, Ray, Vec3};
-
-fn ray_color(r: &Ray, world: &HittableList) -> Color {
-    if let Some(rec) = world.hit(r, 0.0, f64::INFINITY) {
-        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
-    }
-
-    let unit_direction = unit_vector(r.direction);
-    let a = 0.5 * (unit_direction.y + 1.0);
-    (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
-}
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let image_width: usize = 400;
-    let image_height = ((image_width as f64 / aspect_ratio) as usize).max(1);
 
     let mut world = HittableList::default();
     world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
