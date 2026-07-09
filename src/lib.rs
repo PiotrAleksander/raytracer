@@ -5,6 +5,7 @@ pub mod hittable_list;
 pub mod interval;
 pub mod ray;
 pub mod sphere;
+pub mod utils;
 pub mod vec3;
 
 pub use camera::Camera;
@@ -14,4 +15,5 @@ pub use hittable_list::HittableList;
 pub use interval::Interval;
 pub use ray::Ray;
 pub use sphere::Sphere;
+pub use utils::{degrees_to_radians, random_double};
 pub use vec3::{Point3, Vec3};
