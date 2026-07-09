@@ -1,11 +1,9 @@
 use crate::{
-    vec3::unit_vector, write_color, Color, HitRecord, Hittable, HittableList, Interval, Point3,
-    Ray, Vec3,
+    vec3::unit_vector, write_color, Color, Hittable, HittableList, Interval, Point3, Ray, Vec3,
 };
 
 pub struct Camera {
-    pub aspect_ratio: f64,
-    pub image_width: usize,
+    image_width: usize,
     image_height: usize,
     center: Point3,
     pixel00_loc: Point3,
@@ -14,9 +12,36 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn render(&mut self, world: &HittableList) {
-        self.initialize();
+    pub fn new(aspect_ratio: f64, image_width: usize) -> Self {
+        let image_height = ((image_width as f64 / aspect_ratio) as usize).max(1);
 
+        let center = Point3::new(0.0, 0.0, 0.0);
+
+        let focal_length = 1.0;
+        let viewport_height = 2.0;
+        let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
+
+        let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
+        let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
+
+        let pixel_delta_u = viewport_u / image_width as f64;
+        let pixel_delta_v = viewport_v / image_height as f64;
+
+        let viewport_upper_left =
+            center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+        Self {
+            image_width,
+            image_height,
+            center,
+            pixel00_loc,
+            pixel_delta_u,
+            pixel_delta_v,
+        }
+    }
+
+    pub fn render(&self, world: &HittableList) {
         println!("P3\n{} {} 255", self.image_width, self.image_height);
 
         for j in 0..self.image_height {
@@ -27,46 +52,21 @@ impl Camera {
                     + (j as f64 * self.pixel_delta_v);
                 let ray_direction = pixel_center - self.center;
                 let r = Ray::new(self.center, ray_direction);
-                let pixel_color = self.ray_color(&r, &world);
+                let pixel_color = ray_color(&r, world);
                 write_color(pixel_color);
             }
         }
 
-        println!("\rDone.                 \n");
+        eprintln!("Done.");
+    }
+}
+
+fn ray_color(r: &Ray, world: &HittableList) -> Color {
+    if let Some(rec) = world.hit(r, Interval::new(0.0, f64::INFINITY)) {
+        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
     }
 
-    fn initialize(&mut self) {
-        let image_width: usize = 400;
-        let image_height = ((image_width as f64 / self.aspect_ratio) as usize).max(1);
-        self.center = Point3::new(0.0, 0.0, 0.0);
-
-        let focal_length = 1.0;
-        let viewport_height = 2.0;
-        let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
-        let camera_center = Point3::new(0.0, 0.0, 0.0);
-
-        let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
-
-        let pixel_delta_u = viewport_u / image_width as f64;
-        let pixel_delta_v = viewport_v / image_height as f64;
-
-        let viewport_upper_left =
-            camera_center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
-        self.pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
-    }
-
-    fn ray_color(&self, r: &Ray, world: &HittableList) -> Color {
-        if let Some(rec) = world.hit(
-            r,
-            &mut Interval::new(0.0, f64::INFINITY),
-            &mut HitRecord::default(),
-        ) {
-            return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
-        }
-
-        let unit_direction = unit_vector(r.direction);
-        let a = 0.5 * (unit_direction.y + 1.0);
-        (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
-    }
+    let unit_direction = unit_vector(r.direction);
+    let a = 0.5 * (unit_direction.y + 1.0);
+    (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
 }

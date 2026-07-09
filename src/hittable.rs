@@ -20,10 +20,5 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(
-        &self,
-        r: &Ray,
-        interval: &mut Interval,
-        hit_record: &mut HitRecord,
-    ) -> Option<HitRecord>;
+    fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord>;
 }
