@@ -15,5 +15,5 @@ pub use hittable_list::HittableList;
 pub use interval::Interval;
 pub use ray::Ray;
 pub use sphere::Sphere;
-pub use utils::{degrees_to_radians, random_double};
+pub use utils::degrees_to_radians;
 pub use vec3::{Point3, Vec3};

@@ -1,3 +1,4 @@
+use rand::RngExt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
 #[derive(Default, Debug, Clone, Copy)]
@@ -30,6 +31,14 @@ impl Vec3 {
 
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
+    }
+
+    pub fn random_vec3(min: f64, max: f64) -> Vec3 {
+        Self::new(
+            rand::rng().random_range(min..max),
+            rand::rng().random_range(min..max),
+            rand::rng().random_range(min..max),
+        )
     }
 }
 
@@ -117,4 +126,24 @@ impl std::fmt::Display for Vec3 {
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
     v / v.length()
+}
+
+pub fn random_unit_vector() -> Vec3 {
+    loop {
+        let p = Vec3::random_vec3(-1.0, 1.0);
+        let lensq = p.length_squared();
+        if f64::MIN_POSITIVE < lensq && lensq <= 1.0 {
+            return p / lensq.sqrt();
+        }
+    }
+}
+
+pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+
+    if on_unit_sphere.dot(normal) > 0.0 {
+        on_unit_sphere
+    } else {
+        -on_unit_sphere
+    }
 }
