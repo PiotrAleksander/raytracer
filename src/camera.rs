@@ -1,8 +1,7 @@
 use rand::RngExt;
 
 use crate::{
-    vec3::{random_unit_vector, unit_vector},
-    write_color, Color, Hittable, HittableList, Interval, Point3, Ray, Vec3,
+    vec3::unit_vector, write_color, Color, Hittable, HittableList, Interval, Point3, Ray, Vec3,
 };
 
 pub struct Camera {
@@ -101,9 +100,10 @@ fn ray_color(r: &Ray, depth: usize, world: &HittableList) -> Color {
     }
 
     if let Some(rec) = world.hit(r, Interval::new(0.001, f64::INFINITY)) {
-        // let direction = random_on_hemisphere(rec.normal);
-        let direction = rec.normal + random_unit_vector();
-        return 0.5 * ray_color(&Ray::new(rec.p, direction), depth - 1, world);
+        if let Some(scatter) = rec.material.scatter(r, &rec) {
+            return scatter.attenuation * ray_color(&scatter.scattered, depth - 1, world);
+        }
+        return Color::new(0.0, 0.0, 0.0);
     }
 
     let unit_direction = unit_vector(r.direction);

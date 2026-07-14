@@ -29,6 +29,11 @@ impl Vec3 {
         self.dot(*self)
     }
 
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
