@@ -14,7 +14,7 @@ pub use color::{write_color, Color};
 pub use hittable::{HitRecord, Hittable};
 pub use hittable_list::HittableList;
 pub use interval::Interval;
-pub use material::{Lambertian, Material, Scatter};
+pub use material::{Lambertian, Material, Metal, Scatter};
 pub use ray::Ray;
 pub use sphere::Sphere;
 pub use utils::degrees_to_radians;
