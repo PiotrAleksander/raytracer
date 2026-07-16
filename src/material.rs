@@ -1,3 +1,5 @@
+use rand::RngExt;
+
 use crate::{
     vec3::{random_unit_vector, reflect, refract, unit_vector},
     Color, HitRecord, Ray,
@@ -70,6 +72,13 @@ impl Dielectric {
     pub fn new(refraction_index: f64) -> Self {
         Self { refraction_index }
     }
+
+    fn reflectance(&self, cosine: f64, ri: f64) -> f64 {
+        // Use Schlick's approximation for reflectance.
+        let r0 = (1.0 - ri) / (1.0 + ri);
+        let r0_squared = r0 * r0;
+        r0_squared + (1.0 - r0_squared) * (1.0 - cosine).powi(5)
+    }
 }
 
 impl Material for Dielectric {
@@ -82,11 +91,21 @@ impl Material for Dielectric {
         };
 
         let unit_direction = unit_vector(r_in.direction);
-        let refracted = refract(unit_direction, rec.normal, ri);
+        let cos_theta = f64::min(-unit_direction.dot(rec.normal), 1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+        let cannot_refract = ri * sin_theta > 1.0;
+        let direction;
+
+        if cannot_refract || self.reflectance(cos_theta, ri) > rand::rng().random() {
+            direction = reflect(unit_direction, rec.normal);
+        } else {
+            direction = refract(unit_direction, rec.normal, ri);
+        }
 
         Some(Scatter {
             attenuation,
-            scattered: Ray::new(rec.p, refracted),
+            scattered: Ray::new(rec.p, direction),
         })
     }
 }
