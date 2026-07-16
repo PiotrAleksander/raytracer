@@ -1,5 +1,5 @@
 use crate::{
-    vec3::{random_unit_vector, reflect, unit_vector},
+    vec3::{random_unit_vector, reflect, refract, unit_vector},
     Color, HitRecord, Ray,
 };
 
@@ -58,6 +58,35 @@ impl Material for Metal {
         Some(Scatter {
             attenuation: self.albedo,
             scattered: Ray::new(rec.p, fuzzed_reflected),
+        })
+    }
+}
+
+pub struct Dielectric {
+    pub refraction_index: f64,
+}
+
+impl Dielectric {
+    pub fn new(refraction_index: f64) -> Self {
+        Self { refraction_index }
+    }
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<Scatter> {
+        let attenuation = Color::new(1.0, 1.0, 1.0);
+        let ri = if rec.front_face {
+            1.0 / self.refraction_index
+        } else {
+            self.refraction_index
+        };
+
+        let unit_direction = unit_vector(r_in.direction);
+        let refracted = refract(unit_direction, rec.normal, ri);
+
+        Some(Scatter {
+            attenuation,
+            scattered: Ray::new(rec.p, refracted),
         })
     }
 }
