@@ -1,7 +1,8 @@
 use rand::RngExt;
 
 use crate::{
-    vec3::unit_vector, write_color, Color, Hittable, HittableList, Interval, Point3, Ray, Vec3,
+    degrees_to_radians, vec3::unit_vector, write_color, Color, Hittable, HittableList, Interval,
+    Point3, Ray, Vec3,
 };
 
 pub struct Camera {
@@ -23,13 +24,16 @@ impl Camera {
         image_width: usize,
         samples_per_pixel: usize,
         max_depth: usize,
+        vfov: f64,
     ) -> Self {
         let image_height = ((image_width as f64 / aspect_ratio) as usize).max(1);
 
         let center = Point3::new(0.0, 0.0, 0.0);
 
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = degrees_to_radians(vfov);
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
 
         let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);

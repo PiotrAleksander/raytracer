@@ -36,6 +36,6 @@ fn main() {
         material_right,
     )));
 
-    let camera = Camera::new(16.0 / 9.0, 400, 100, 10);
+    let camera = Camera::new(16.0 / 9.0, 400, 100, 10, 90.0);
     camera.render(&world);
 }

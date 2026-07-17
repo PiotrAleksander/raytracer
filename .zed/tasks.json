@@ -5,5 +5,12 @@
     "reveal": "always",
     "use_new_terminal": false,
     "allow_concurrent_runs": false
+  },
+  {
+    "label": "make open (wide_angle)",
+    "command": "make open BIN=wide_angle",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
   }
 ]
