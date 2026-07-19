@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
 use raytracing::{
-    Camera, Color, Dielectric, HittableList, Lambertian, Metal, Point3, Sphere, Vec3,
+    camera::CameraConfig, Camera, Color, Dielectric, HittableList, Lambertian, Metal, Point3,
+    Sphere, Vec3,
 };
 
 fn main() {
@@ -38,15 +39,17 @@ fn main() {
         material_right,
     )));
 
-    let camera = Camera::new(
-        16.0 / 9.0,
-        400,
-        100,
-        10,
-        20.0,
-        Point3::new(-2.0, 2.0, 1.0),
-        Point3::new(0.0, 0.0, -1.0),
-        Vec3::new(0.0, 1.0, 0.0),
-    );
+    let camera = Camera::new(CameraConfig {
+        aspect_ratio: 16.0 / 9.0,
+        image_width: 400,
+        samples_per_pixel: 100,
+        max_depth: 10,
+        vfov: 33.0,
+        lookfrom: Point3::new(-2.0, 2.0, 1.0),
+        lookat: Point3::new(0.0, 0.0, -1.0),
+        vup: Vec3::new(0.0, 1.0, 0.0),
+        defocus_angle: 10.0,
+        focus_dist: 3.4,
+    });
     camera.render(&world);
 }
