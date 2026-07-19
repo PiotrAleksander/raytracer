@@ -17,5 +17,5 @@ pub use interval::Interval;
 pub use material::{Dielectric, Lambertian, Material, Metal, Scatter};
 pub use ray::Ray;
 pub use sphere::Sphere;
-pub use utils::degrees_to_radians;
+pub use utils::{degrees_to_radians, random_f64, random_range};
 pub use vec3::{Point3, Vec3};

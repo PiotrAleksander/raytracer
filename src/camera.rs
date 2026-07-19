@@ -1,7 +1,9 @@
-use rand::RngExt;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use rayon::prelude::*;
 
 use crate::{
-    degrees_to_radians,
+    degrees_to_radians, random_range,
     vec3::{random_in_unit_disk, unit_vector},
     write_color, Color, Hittable, HittableList, Interval, Point3, Ray, Vec3,
 };
@@ -81,19 +83,33 @@ impl Camera {
     pub fn render(&self, world: &HittableList) {
         println!("P3\n{} {} 255", self.image_width, self.image_height);
 
-        for j in 0..self.image_height {
-            eprintln!("Scanlines remaining: {}", self.image_height - j);
-            for i in 0..self.image_width {
-                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
-                for _ in 0..self.samples_per_pixel {
-                    let r = self.get_ray(i, j);
-                    pixel_color += ray_color(&r, self.max_depth, world);
-                }
-                write_color(self.pixel_samples_scale as f64 * pixel_color);
+        let scanlines_done = AtomicUsize::new(0);
+        let rows: Vec<Vec<Color>> = (0..self.image_height)
+            .into_par_iter()
+            .map(|j| {
+                let row: Vec<Color> = (0..self.image_width)
+                    .map(|i| {
+                        let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                        for _ in 0..self.samples_per_pixel {
+                            let r = self.get_ray(i, j);
+                            pixel_color += ray_color(&r, self.max_depth, world);
+                        }
+                        self.pixel_samples_scale * pixel_color
+                    })
+                    .collect();
+                let done = scanlines_done.fetch_add(1, Ordering::Relaxed) + 1;
+                eprint!("\rScanlines remaining: {}   ", self.image_height - done);
+                row
+            })
+            .collect();
+
+        for row in rows {
+            for pixel in row {
+                write_color(pixel);
             }
         }
 
-        eprintln!("Done.");
+        eprintln!("\nDone.");
     }
 
     fn defocus_disk_sample(&self) -> Point3 {
@@ -119,11 +135,7 @@ impl Camera {
 }
 
 fn sample_square() -> Vec3 {
-    Vec3::new(
-        rand::rng().random_range(-0.5..0.5),
-        rand::rng().random_range(-0.5..0.5),
-        0.0,
-    )
+    Vec3::new(random_range(-0.5, 0.5), random_range(-0.5, 0.5), 0.0)
 }
 
 fn ray_color(r: &Ray, depth: usize, world: &HittableList) -> Color {

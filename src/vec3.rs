@@ -1,5 +1,6 @@
-use rand::RngExt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
+
+use crate::random_range;
 
 #[derive(Default, Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -40,9 +41,9 @@ impl Vec3 {
 
     pub fn random_vec3(min: f64, max: f64) -> Vec3 {
         Self::new(
-            rand::rng().random_range(min..max),
-            rand::rng().random_range(min..max),
-            rand::rng().random_range(min..max),
+            random_range(min, max),
+            random_range(min, max),
+            random_range(min, max),
         )
     }
 }
@@ -155,11 +156,7 @@ pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
 
 pub fn random_in_unit_disk() -> Vec3 {
     loop {
-        let p = Vec3::new(
-            rand::rng().random_range(-1.0..1.0),
-            rand::rng().random_range(-1.0..1.0),
-            0.0,
-        );
+        let p = Vec3::new(random_range(-1.0, 1.0), random_range(-1.0, 1.0), 0.0);
         if p.length_squared() < 1.0 {
             return p;
         }

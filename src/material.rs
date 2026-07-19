@@ -1,6 +1,5 @@
-use rand::RngExt;
-
 use crate::{
+    random_f64,
     vec3::{random_unit_vector, reflect, refract, unit_vector},
     Color, HitRecord, Ray,
 };
@@ -10,7 +9,7 @@ pub struct Scatter {
     pub scattered: Ray,
 }
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<Scatter>;
 }
 
@@ -74,7 +73,6 @@ impl Dielectric {
     }
 
     fn reflectance(&self, cosine: f64, ri: f64) -> f64 {
-        // Use Schlick's approximation for reflectance.
         let r0 = (1.0 - ri) / (1.0 + ri);
         let r0_squared = r0 * r0;
         r0_squared + (1.0 - r0_squared) * (1.0 - cosine).powi(5)
@@ -97,7 +95,7 @@ impl Material for Dielectric {
         let cannot_refract = ri * sin_theta > 1.0;
         let direction;
 
-        if cannot_refract || self.reflectance(cos_theta, ri) > rand::rng().random() {
+        if cannot_refract || self.reflectance(cos_theta, ri) > random_f64() {
             direction = reflect(unit_direction, rec.normal);
         } else {
             direction = refract(unit_direction, rec.normal, ri);
