@@ -16,9 +16,6 @@ pub struct Camera {
     pixel00_loc: Point3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
-    u: Vec3,
-    v: Vec3,
-    w: Vec3,
 }
 
 impl Camera {
@@ -64,9 +61,6 @@ impl Camera {
             samples_per_pixel,
             max_depth,
             pixel_samples_scale: 1.0 / samples_per_pixel as f64,
-            u,
-            v,
-            w,
         }
     }
 
